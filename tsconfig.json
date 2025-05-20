@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+      "target": "ES2020",
+      "module": "commonjs",           // atau "ES2020" juga boleh
+      "esModuleInterop": true,        // WAJIB: aktifkan ini!
+      "allowSyntheticDefaultImports": true, // opsional, tapi disarankan
+      "strict": true,
+      "outDir": "./dist",
+      "rootDir": "./src"
+    }
+  }
+  
