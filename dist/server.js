@@ -13,7 +13,7 @@ const encode_routes_1 = __importDefault(require("./routes/encode.routes"));
 const data_routes_1 = __importDefault(require("./routes/data.routes"));
 const path_1 = __importDefault(require("path"));
 const app = (0, express_1.default)();
-const PORT = 3018;
+const PORT = 3718;
 // Middleware configuration
 app.use((0, cors_1.default)({
     origin: 'http://localhost:4200',
@@ -22,17 +22,22 @@ app.use((0, cors_1.default)({
 }));
 app.use(express_1.default.json());
 app.use(body_parser_1.default.json({ limit: '5mb' }));
-app.use(express_1.default.static(path_1.default.join(__dirname, 'public')));
-const angularDistPath = path_1.default.join(__dirname, '../ais-generator');
-// Route registration
+// Path to the Angular build directory (adjust to your build directory)
+const angularDistPath = path_1.default.join(__dirname, '../dist/ais-generator');
+// Log the angular dist path for debugging
+console.log("Angular build path: ", angularDistPath);
+// Serve static files (CSS, JS, etc.) from Angular build
+app.use(express_1.default.static(angularDistPath));
+// Route registration for API endpoints
 app.use('/api', csv_routes_1.default);
 app.use('/api', combined_routes_1.default);
 app.use('/api', encode_routes_1.default);
 app.use('/api', data_routes_1.default);
-app.use(express_1.default.static(angularDistPath));
-app.get('*', (req, res) => {
+// Catch-all route for Angular's index.html
+app.get('/demn', (req, res) => {
     res.sendFile(path_1.default.join(angularDistPath, 'index.html'));
 });
+// Start the server
 app.listen(PORT, () => {
     console.log(`Server operational on port ${PORT}`);
 });

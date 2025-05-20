@@ -9,7 +9,7 @@ import dataRoutes from './routes/data.routes';
 import path from 'path';
 
 const app = express();
-const PORT = 3018;
+const PORT = 3718;
 
 // Middleware configuration
 app.use(cors({
