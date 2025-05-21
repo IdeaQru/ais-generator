@@ -52,7 +52,7 @@ export const handleCombinedData = async (
     let data = req.body;
 
     // Cek jika manipulation true
-    if (data.dynamic && data.dynamic.manipulation === false) {
+    if (data.dynamic && data.dynamic.manipulation === true) {
       // Ambil data lat/lng dari stepsData sesuai index
       const currentStep = stepsData[stepIndex] || stepsData[stepsData.length - 1];
 
