@@ -39,5 +39,5 @@ app.get('/demn', (req, res) => {
 });
 // Start the server
 app.listen(PORT, () => {
-    console.log(`Server operational on port ${PORT}`);
+    console.log(`Server operational on port http://localhost:${PORT}`);
 });

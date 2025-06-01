@@ -1,22 +1,21 @@
 {
   "static": {
-    "aistype": "14",
+    "aistype": "5",
     "repeat": 0,
-    "mmsi": "9888",
-    "shipname": "",
-    "part": 0,
-    "safetyMessage": "wkkwwk"
+    "mmsi": "66788",
+    "shipname": "PPNS",
+    "part": 0
   },
   "dynamic": {
-    "manipulation": true,
-    "datasensor": false,
+    "manipulation": false,
+    "datasensor": true,
     "aistype": 1,
-    "mmsi": "9888",
+    "mmsi": "66788",
     "latitude": 0,
     "longitude": 0,
     "sog": 0,
-    "cog": 0,
-    "heading": 511,
+    "cog": 127.5,
+    "heading": 127.5,
     "status": 15,
     "rot": 128,
     "repeat": 0,
@@ -27,8 +26,8 @@
     "minute": 0,
     "second": 0,
     "accuracy": 0,
-    "lon": 110.13527410868126,
-    "lat": -7.310807360794554,
+    "lon": "112.654321",
+    "lat": "-7.7181456",
     "epfd": 0,
     "raim": 0,
     "radio": 0,
@@ -55,5 +54,5 @@
     "displayFlag": 0,
     "dscFlag": 0
   },
-  "interval": "10"
+  "interval": 60
 }
