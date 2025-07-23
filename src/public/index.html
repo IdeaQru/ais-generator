@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RTSP Camera Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            padding: 20px;
+            background: #f8f9fa;
+            text-align: center;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn.success { background: #28a745; }
+        .btn.danger { background: #dc3545; }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .camera-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .camera-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .camera-header {
+            background: #667eea;
+            color: white;
+            padding: 20px;
+            position: relative;
+        }
+
+        .camera-title {
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .status-active { background: #28a745; }
+        .status-inactive { background: #6c757d; }
+        .status-starting { background: #ffc107; color: #212529; }
+        .status-error { background: #dc3545; }
+
+        .camera-body {
+            padding: 20px;
+        }
+
+        .video-container {
+            background: #000;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            height: 250px;
+            position: relative;
+        }
+
+        .video-stream {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .video-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .camera-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .camera-controls .btn {
+            flex: 1;
+            min-width: 100px;
+            font-size: 14px;
+            padding: 8px 16px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .camera-grid { grid-template-columns: 1fr; }
+            .stats { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎥 RTSP Camera Dashboard</h1>
+            <p>Real-time streaming untuk multiple camera RTSP</p>
+        </div>
+
+        <div class="controls">
+            <button class="btn success" onclick="startAllStreams()">
+                🚀 Start All Streams
+            </button>
+            <button class="btn danger" onclick="stopAllStreams()">
+                🛑 Stop All Streams
+            </button>
+            <button class="btn" onclick="refreshData()">
+                🔄 Refresh
+            </button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="total-cameras">0</div>
+                <div>Total Cameras</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="active-streams">0</div>
+                <div>Active Streams</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="sse-streams">0</div>
+                <div>SSE Streams</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="mjpeg-streams">0</div>
+                <div>MJPEG Streams</div>
+            </div>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            🔄 Loading cameras...
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <div id="camera-container" class="camera-grid">
+            <!-- Camera cards akan dimuat di sini -->
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin; // Dynamic base URL
+        let cameras = [];
+        let sseConnections = new Map();
+
+        // Load cameras saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCameras();
+            setInterval(updateStats, 5000); // Update stats setiap 5 detik
+        });
+
+        async function loadCameras() {
+            showLoading(true);
+            try {
+                const response = await fetch(`${API_BASE}/api/cameras`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                cameras = await response.json();
+                displayCameras(cameras);
+                updateStats();
+                showError('');
+            } catch (error) {
+                console.error('Error loading cameras:', error);
+                showError(`Failed to load cameras: ${error.message}`);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function displayCameras(cameras) {
+            const container = document.getElementById('camera-container');
+            
+            if (!cameras || cameras.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        <h3>No cameras available</h3>
+                        <p>Check camera configuration.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = cameras.map(camera => `
+                <div class="camera-card" id="camera-${camera.id}">
+                    <div class="camera-header">
+                        <div class="camera-title">${camera.name}</div>
+                        <span class="status-badge status-inactive" id="status-${camera.id}">inactive</span>
+                    </div>
+                    <div class="camera-body">
+                        <div class="video-container">
+                            <div class="video-placeholder" id="placeholder-${camera.id}">
+                                📷 Click "Start SSE" atau "Start MJPEG" to begin
+                            </div>
+                            <img class="video-stream" id="mjpeg-${camera.id}" style="display: none;" />
+                        </div>
+                        <div class="camera-controls">
+                            <button class="btn success" onclick="startSSEStream('${camera.id}')">
+                                📡 Start SSE
+                            </button>
+                            <button class="btn" onclick="startMJPEGStream('${camera.id}')">
+                                🎥 Start MJPEG
+                            </button>
+                            <button class="btn danger" onclick="stopStream('${camera.id}')">
+                                🛑 Stop
+                            </button>
+                        </div>
+                        <div style="margin-top: 10px; font-size: 0.9em; color: #666;">
+                            <strong>Type:</strong> ${camera.type}<br>
+                            <strong>Location:</strong> ${camera.location || 'Unknown'}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('total-cameras').textContent = cameras.length;
+        }
+
+        async function startSSEStream(cameraId) {
+            try {
+                // Stop MJPEG jika ada
+                const mjpegImg = document.getElementById(`mjpeg-${cameraId}`);
+                if (mjpegImg.src) {
+                    mjpegImg.style.display = 'none';
+                    mjpegImg.src = '';
+                }
+
+                // Close existing SSE
+                if (sseConnections.has(cameraId)) {
+                    sseConnections.get(cameraId).close();
+                }
+
+                updateStatus(cameraId, 'starting');
+                const placeholder = document.getElementById(`placeholder-${cameraId}`);
+                placeholder.innerHTML = '🔄 Connecting to SSE...';
+                placeholder.style.display = 'flex';
+
+                // Create SSE connection
+                const eventSource = new EventSource(`${API_BASE}/stream-events/${cameraId}`);
+                sseConnections.set(cameraId, eventSource);
+
+                eventSource.onmessage = function(event) {
+                    const data = JSON.parse(event.data);
+                    
+                    if (data.type === 'frame') {
+                        placeholder.innerHTML = `📡 SSE Active (${data.timestamp})`;
+                        updateStatus(cameraId, 'active');
+                    } else if (data.type === 'connected') {
+                        placeholder.innerHTML = '📡 SSE Connected, waiting for frames...';
+                    } else if (data.type === 'error') {
+                        placeholder.innerHTML = `❌ SSE Error: ${data.message}`;
+                        updateStatus(cameraId, 'error');
+                    }
+                };
+
+                eventSource.onerror = function() {
+                    placeholder.innerHTML = '❌ SSE Connection failed';
+                    updateStatus(cameraId, 'error');
+                    sseConnections.delete(cameraId);
+                };
+
+            } catch (error) {
+                console.error(`Error starting SSE stream for ${cameraId}:`, error);
+                updateStatus(cameraId, 'error');
+            }
+        }
+
+        function startMJPEGStream(cameraId) {
+            try {
+                // Close SSE jika ada
+                if (sseConnections.has(cameraId)) {
+                    sseConnections.get(cameraId).close();
+                    sseConnections.delete(cameraId);
+                }
+
+                updateStatus(cameraId, 'starting');
+                const placeholder = document.getElementById(`placeholder-${cameraId}`);
+                const mjpegImg = document.getElementById(`mjpeg-${cameraId}`);
+
+                placeholder.innerHTML = '🔄 Loading MJPEG...';
+                placeholder.style.display = 'flex';
+
+                mjpegImg.src = `${API_BASE}/api/cameras/${cameraId}/stream?t=${Date.now()}`;
+                
+                mjpegImg.onload = function() {
+                    placeholder.style.display = 'none';
+                    mjpegImg.style.display = 'block';
+                    updateStatus(cameraId, 'active');
+                };
+
+                mjpegImg.onerror = function() {
+                    placeholder.innerHTML = '❌ MJPEG failed to load';
+                    placeholder.style.display = 'flex';
+                    mjpegImg.style.display = 'none';
+                    updateStatus(cameraId, 'error');
+                };
+
+            } catch (error) {
+                console.error(`Error starting MJPEG stream for ${cameraId}:`, error);
+                updateStatus(cameraId, 'error');
+            }
+        }
+
+        async function stopStream(cameraId) {
+            try {
+                // Stop SSE
+                if (sseConnections.has(cameraId)) {
+                    sseConnections.get(cameraId).close();
+                    sseConnections.delete(cameraId);
+                }
+
+                // Stop MJPEG
+                const mjpegImg = document.getElementById(`mjpeg-${cameraId}`);
+                mjpegImg.src = '';
+                mjpegImg.style.display = 'none';
+
+                // Reset placeholder
+                const placeholder = document.getElementById(`placeholder-${cameraId}`);
+                placeholder.innerHTML = '📷 Stream stopped. Click start to begin streaming';
+                placeholder.style.display = 'flex';
+
+                updateStatus(cameraId, 'inactive');
+
+                // Call server stop endpoints
+                await fetch(`${API_BASE}/api/sse-streams/${cameraId}/stop`, { method: 'POST' });
+                await fetch(`${API_BASE}/api/mjpeg-streams/${cameraId}/stop`, { method: 'POST' });
+
+            } catch (error) {
+                console.error(`Error stopping stream for ${cameraId}:`, error);
+            }
+        }
+
+        async function startAllStreams() {
+            for (const camera of cameras) {
+                await startSSEStream(camera.id);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+
+        async function stopAllStreams() {
+            for (const camera of cameras) {
+                await stopStream(camera.id);
+            }
+        }
+
+        async function refreshData() {
+            await loadCameras();
+        }
+
+        async function updateStats() {
+            try {
+                const sseResponse = await fetch(`${API_BASE}/api/sse-streams`);
+                if (sseResponse.ok) {
+                    const sseData = await sseResponse.json();
+                    document.getElementById('sse-streams').textContent = sseData.stats?.totalStreams || 0;
+                }
+
+                const mjpegResponse = await fetch(`${API_BASE}/api/mjpeg-streams`);
+                if (mjpegResponse.ok) {
+                    const mjpegData = await mjpegResponse.json();
+                    document.getElementById('mjpeg-streams').textContent = mjpegData.stats?.totalStreams || 0;
+                }
+
+                const activeSSE = sseConnections.size;
+                const activeMJPEG = document.querySelectorAll('img[src*="/api/cameras/"]').length;
+                document.getElementById('active-streams').textContent = activeSSE + activeMJPEG;
+
+            } catch (error) {
+                console.error('Error updating stats:', error);
+            }
+        }
+
+        function updateStatus(cameraId, status) {
+            const statusBadge = document.getElementById(`status-${cameraId}`);
+            if (statusBadge) {
+                statusBadge.className = `status-badge status-${status}`;
+                statusBadge.textContent = status;
+            }
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        function showError(message) {
+            const error = document.getElementById('error');
+            if (message) {
+                error.textContent = message;
+                error.style.display = 'block';
+            } else {
+                error.style.display = 'none';
+            }
+        }
+
+        // Close SSE connections saat page unload
+        window.addEventListener('beforeunload', () => {
+            sseConnections.forEach(eventSource => {
+                eventSource.close();
+            });
+        });
+    </script>
+</body>
+</html>

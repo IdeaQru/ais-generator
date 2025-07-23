@@ -8,4 +8,7 @@ const data_controller_1 = __importDefault(require("../controllers/data.controlle
 const router = (0, express_1.Router)();
 router.get('/datasensor', (req, res) => data_controller_1.default.getAllData(req, res));
 router.post('/datasensor', (req, res) => data_controller_1.default.saveData(req, res));
+//function post data sensorf
+// export function postDatasensor(req: Request, res: Response) {
+// }
 exports.default = router;

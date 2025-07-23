@@ -2,20 +2,20 @@
   "static": {
     "aistype": "5",
     "repeat": 0,
-    "mmsi": "66788",
-    "shipname": "PPNS",
+    "mmsi": "718718718",
+    "shipname": "KapalPengujianALKI2PPNS",
     "part": 0
   },
   "dynamic": {
-    "manipulation": false,
-    "datasensor": true,
+    "manipulation": true,
+    "datasensor": false,
     "aistype": 1,
-    "mmsi": "66788",
+    "mmsi": "718718718",
     "latitude": 0,
     "longitude": 0,
     "sog": 0,
-    "cog": 127.5,
-    "heading": 127.5,
+    "cog": 0,
+    "heading": 511,
     "status": 15,
     "rot": 128,
     "repeat": 0,
@@ -26,8 +26,8 @@
     "minute": 0,
     "second": 0,
     "accuracy": 0,
-    "lon": "112.654321",
-    "lat": "-7.7181456",
+    "lon": 112.753337254362,
+    "lat": -7.354233492241047,
     "epfd": 0,
     "raim": 0,
     "radio": 0,
@@ -54,5 +54,5 @@
     "displayFlag": 0,
     "dscFlag": 0
   },
-  "interval": 60
+  "interval": "5"
 }
